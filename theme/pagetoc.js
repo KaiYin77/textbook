@@ -17,6 +17,23 @@ const listenActive = () => {
 
 const getPagetoc = () => document.querySelector(".pagetoc") || autoCreatePagetoc();
 
+function applyResponsiveLayout() {
+  const main = document.querySelector("#content > main");
+  if (!main) return;
+
+  const content = main.querySelector(".content-wrap");
+  if (!content) return;
+
+  const sidetoc = main.querySelector(".sidetoc");
+  const isMobile = window.innerWidth < 1024;
+
+  content.style.width = isMobile ? "100%" : "85%";
+
+  if (sidetoc) {
+    sidetoc.style.display = isMobile ? "none" : "";
+  }
+}
+
 const autoCreatePagetoc = () => {
   const main = document.querySelector("#content > main");
   
@@ -27,10 +44,7 @@ const autoCreatePagetoc = () => {
   const content = Object.assign(document.createElement("div"), {
     className: "content-wrap"
   });
-  
-  // Set content-wrap to 80% width
-  content.style.width = '85%';
-  
+
   content.append(...main.childNodes);
   main.prepend(content);
   
@@ -45,6 +59,7 @@ const autoCreatePagetoc = () => {
   sidetoc.appendChild(pagetoc);
   main.insertBefore(sidetoc, content);
 
+  applyResponsiveLayout();
   return pagetoc;
 };
 const updateFunction = () => {
@@ -87,5 +102,7 @@ window.addEventListener('load', () => {
   updateFunction();
   listenActive();
   window.addEventListener("scroll", updateFunction);
+  applyResponsiveLayout();
 });
 
+window.addEventListener("resize", applyResponsiveLayout);
