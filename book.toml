@@ -1,0 +1,13 @@
+[book]
+authors = ["kaiyin"]
+language = "en"
+multilingual = false
+src = "src"
+title = "textbook"
+
+[preprocessor.pagetoc]
+[output.html]
+additional-css = ["theme/pagetoc.css", "theme/footer.css"]
+additional-js  = ["theme/pagetoc.js"]
+default-theme = "light"
+preferred-dark-theme = "ayu"

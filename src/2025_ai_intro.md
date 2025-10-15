@@ -1,5 +1,6 @@
 # 在ChatGPT 還沒瘋狂之前：AI 是怎麼做出決策的？
 
+## 前言
 身處在 ChatGPT 帶來的 AI 世代裡，這股商業脅持技術的浪潮，正以前所未有的速度席捲各行各業。從產品設計、商業決策，到日常生活的微小選擇，「AI 加持」彷彿能解決人類所有遇到瓶頸的問題。然而，喧囂的市場往往忽略了本質。
 
 回顧歷史，人工智慧的發展絕非一蹴可幾。自 1956 年達特茅斯會議首次提出「AI」概念以來，這項技術歷經數次高潮與寒冬——從符號主義、機器學習（Machine Learning），到深度學習（Deep Learning）、ChatGPT這些AI代名詞的興起，每一次的迭代都重新定義了人們對「智慧」的想像。即便技術名稱與方法不斷演變，AI的底層本質始終如一：資料與模型，是它的雙驅動引擎。
@@ -32,7 +33,7 @@
 ## 模型Model中，甚麼是Training、甚麼是Inference？
 
 架構示意圖如下所示。
-![Archeitecture 示意圖](img/arch.png)
+![Archeitecture 示意圖](public/arch.png)
 
 > - Training（訓練）：模型讀取大量「特徵＋標籤」的組合，調整參數讓預測更接近真實答案。  
 > - Inference（推論）：模型接收尚未看過的資料，只靠訓練好的參數產生預測結果。
@@ -57,7 +58,7 @@
 
 ### Label（標籤）
 標籤就是人類賦予的答案。  
-![Label 示意圖](img/label.png)  
+![Label 示意圖](public/label.png)  
 例：以Google驗證當作範例，請人類幫忙標註哪裡有斑馬線，就是在幫Google建立資料的標籤，讓他們的模型可以知道答案。
 
 ### Logit
@@ -99,7 +100,7 @@ logits = X @ W + b                # ≈ [[1.01, 0.56]]
 exp_logits = np.exp(logits - logits.max(axis=1, keepdims=True))  # 數值穩定技巧
 probs = exp_logits / exp_logits.sum(axis=1, keepdims=True)       # ≈ [[0.61, 0.39]]
 
-# Step C: 交叉熵損失（Loss）- 衡量預測與真實標籤的差距
+# Step C: Cross Entropy Loss- 衡量預測與真實標籤的差距指標
 true_probs = probs[np.arange(len(y)), y]
 loss = -np.log(true_probs).mean()  # ≈ 0.49
 
@@ -108,12 +109,12 @@ print("Probabilities:\n", probs)
 print("Loss:", loss)
 
 # --- Backward pass --------------------------------------------------------
-# Step D: ∂Loss/∂logits（softmax + cross-entropy 的梯度閉式解）
+# Step D: ∂Loss/∂logits（softmax + cross-entropy 的Closed-form）
 grad_logits = probs.copy()            # ≈ [[0.61, 0.39]]
 grad_logits[np.arange(len(y)), y] -= 1  # ≈ [[-0.39, 0.39]]
 grad_logits /= len(y)                 # ≈ [[-0.39, 0.39]]（batch=1）
 
-# Step E: 鏈式法則，把梯度傳回權重與偏差
+# Step E: 透過Chain Rule，反向把梯度傳回權重與偏差 (Backpropagation)
 grad_W = X.T @ grad_logits            # ≈ [[-0.0779, 0.0779], [-0.4283, 0.4283], [0.1168, -0.1168]]
 grad_b = grad_logits.sum(axis=0)      # ≈ [-0.39, 0.39]
 
@@ -121,7 +122,7 @@ print("Grad W:\n", grad_W)
 print("Grad b:", grad_b)
 
 # --- Parameter update -----------------------------------------------------
-# Step F: 以梯度下降更新參數（W ← W - η · 梯度）
+# Step F: 以梯度下降(Gradient Descent) 更新參數（W ← W - η · 梯度）
 learning_rate = 0.1
 W -= learning_rate * grad_W          # ≈ [[1.208, -0.708], ...]
 b -= learning_rate * grad_b          # ≈ [0.139, -0.239]
@@ -130,9 +131,7 @@ print("Updated W:\n", W)
 print("Updated b:", b)
 ```
 
-經過一次 forward（前向傳遞）、loss（損失計算） 與 backpropagation（反向傳遞） 的流程後，模型的權重（weights）與偏差（bias）就會被更新。接著，這些新的參數會在下一輪訓練中再次參與運算，讓分類器的表現逐步提升。
-
-透過不斷迭代這個過程，最終我們便能得到一個訓練完成的模型。此時，在實際應用階段，就只需要進行 forward pass（前向傳遞），模型便能根據輸入資料進行推論並輸出預測結果。
+經過一次 Forward Pass: Inference（前向傳遞）、Loss（損失計算） 與 Backward Pass: Backpropagation（反向傳遞）的流程後，模型參數中的權重（weights）與偏差（bias）就會被更新。接著，這些新的參數會在下一輪訓練中再次參與運算，讓分類器的表現逐步提升。透過不斷迭代這個過程，最終我們便能得到一個訓練完成的模型。此時，在實際應用階段，就只需要進行Inference，模型便能根據輸入資料進行推論並輸出預測結果。
 
 
 ## 小結
